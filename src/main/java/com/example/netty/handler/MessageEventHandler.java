@@ -1,9 +1,11 @@
-package com.example.netty.service;
+package com.example.netty.handler;
 
 import com.corundumstudio.socketio.SocketIOClient;
 import com.corundumstudio.socketio.SocketIOServer;
 import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
+import com.corundumstudio.socketio.annotation.OnEvent;
+import com.example.netty.vo.Message;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,9 +20,9 @@ import org.springframework.stereotype.Service;
  * @time 20:34
  */
 @Service
-public class SocketService {
+public class MessageEventHandler {
 
-    private static final Logger logger = LoggerFactory.getLogger(SocketService.class);
+    private static final Logger logger = LoggerFactory.getLogger(MessageEventHandler.class);
 
     @Autowired
     SocketIOServer server;
@@ -41,10 +43,20 @@ public class SocketService {
         logger.info("ip: " + client.getRemoteAddress().toString() + ",uuid: " + uuid + " disConnect");
     }
 
+    @OnEvent(value = "message")
+    public void message(SocketIOClient client, Message message) {
+        /*String username = client.get("username");
+        String message = client.get("message");*/
+        System.out.println("u: " + message.getUsername() + ", m: " + message.getMessage());
+        sendMessageToAllClient("recieve", "get out ...");
+    }
+
     public void sendMessageToAllClient(String eventType, String message) {
         Collection<SocketIOClient> clients = server.getAllClients();
         for (SocketIOClient client : clients) {
             client.sendEvent(eventType, message);
         }
     }
+
+
 }

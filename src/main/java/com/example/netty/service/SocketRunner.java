@@ -19,5 +19,6 @@ public class SocketRunner implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         server.start();
+        System.out.println("socket server start...");
     }
 }

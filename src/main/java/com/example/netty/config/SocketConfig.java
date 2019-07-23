@@ -1,6 +1,7 @@
 package com.example.netty.config;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.Transport;
 import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -28,7 +29,8 @@ public class SocketConfig {
         com.corundumstudio.socketio.Configuration config = new com.corundumstudio.socketio.Configuration();
         config.setHostname(host);
         config.setPort(port);
-        config.setOrigin(originHost);
+        config.setOrigin(":*:");
+        config.setTransports(Transport.WEBSOCKET,Transport.POLLING);
         final SocketIOServer server = new SocketIOServer(config);
         return server;
     }

@@ -3,12 +3,123 @@
 <head>
     <meta charset="UTF-8">
     <title>chat</title>
-    <link href="bootstrap.css" rel="styleshelt"></head>
+    <link href="bootstrap.css" rel="styleshelt">
+</head>
 
-    <style>
-    </style>
+<style>
+    body {
+        padding: 20px;
+    }
+
+    .console {
+        height: 400px;
+        overflow: auto;
+    }
+
+    .username-msg {
+        color: orange;
+    }
+
+    .connect-msg {
+        color: green;
+    }
+
+    .disconnect-msg {
+        color: red
+    }
+
+    .send-msg {
+        color: #888
+    }
+</style>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js"></script>
+
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+
+<script src="https://cdn.bootcss.com/moment.js/2.19.4/moment.min.js"></script>
+
+<!--
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.24.0/locale/af.js"></script>
+-->
+
+<script>
+    var username = "user_" + Math.floor((Math.random() * 1000) + 1);
+    var socket = io.connect('http://192.168.1.150:9091', {transports: ['websocket', 'xhr-polling', 'jsonp-polling']});
+
+    function connectHandler(parentId) {
+        return function () {
+            output('<span class="connect-msg">Client has connected to the server!</span>', parentId);
+        }
+    }
+
+    function messageHandler(parentId) {
+        return function (data) {
+            output('<span class="username-msg">' + data.username + ':</span>' + data.message, parentId);
+        }
+    }
+
+    function disconnectHandler(parentId) {
+        return function () {
+            output('<span class="disconnect-msg">Client has disconnected to the server!</span>', parentId);
+        }
+    }
+
+    function sendMessageHandler(parentId, username, socket) {
+        var message = $(parentId + ' .msg').val();
+        $(parentId + ' .msg').val('');
+        var jsonObject = {
+            '@class': 'com.corundumstudio.socketio.demo.ChatObject',
+            username: username,
+            message: message
+        };
+        socket.send(jsonObject);
+        /*
+                chatSocket.json().send(jsonObject);
+        */
+    }
+
+    socket.on('connect', connectHandler('#chat'));
+    socket.on('message', messageHandler('#chat'));
+    socket.on('disconnect', disconnectHandler('#chat'));
+    socket.addEventListener('recieve', function (data) {
+        alert(data);
+    });
+
+    function sendDisconnect() {
+        socket.disconnect();
+    }
+
+    function sendMessage() {
+        sendMessageHandler('#chat', username, socket);
+    }
+
+    function output(message, parentId) {
+        /*var currentTime = "<span class='time'>" + new Date().toJSON() + "</span>";*/
+        var currentTime = "<span class='time'>" + moment().format("HH:mm:ss.SSS") + "</span>";
+        var element = $("<div>" + currentTime + " " + message + "</div>")
+        $(parentId + ' .console').prepend(element);
+    }
+
+    $(document).keydown(function (e) {
+        if (e.keyCode == 13) {
+            $('#send').click();
+        }
+    });
+</script>
 </head>
 <body>
+<h1>chat demo</h1>
+<br/>
+<div id="chat" style="width: 49%;float:left;">
+    <h4> chat </h4>
+    <div class="console well"></div>
 
+    <form class="well form-inline" onsubmit="return false;">
+        <input class="msg input-xlarge" type="text" placeholder="Type something..."/>
+        <button type="button" onclick="sendMessage()" class="btn" id="send">Send</button>
+        <button type="button" onclick="sendDisconnect()" class="btn">DisConnect</button>
+    </form>
+</div>
 </body>
 </html>
